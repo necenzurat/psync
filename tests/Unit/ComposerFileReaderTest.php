@@ -18,6 +18,16 @@ it('reads package names from composer.json require and require-dev', function ()
     ]);
 });
 
+it('reads required constraints from composer.json', function () {
+    $constraints = $this->reader->getRequiredConstraints();
+
+    expect($constraints)->toBe([
+        'laravel/framework' => '^12.0',
+        'guzzlehttp/guzzle' => '^7.0',
+        'pestphp/pest' => '^4.0',
+    ]);
+});
+
 it('skips php and ext-* entries', function () {
     $packages = $this->reader->getPackageNames();
 
@@ -58,3 +68,27 @@ it('throws exception when composer.lock is missing', function () {
     unlink($tmpDir . '/composer.json');
     rmdir($tmpDir);
 })->throws(RuntimeException::class, 'composer.lock not found');
+
+it('updates required constraints in composer.json', function () {
+    $tmpDir = sys_get_temp_dir() . '/package-sync-test-update-' . uniqid();
+    mkdir($tmpDir);
+    copy(__DIR__ . '/../Fixtures/composer.json', $tmpDir . '/composer.json');
+    copy(__DIR__ . '/../Fixtures/composer.lock', $tmpDir . '/composer.lock');
+
+    $reader = new ComposerFileReader($tmpDir);
+    $updated = $reader->updateRequiredConstraints([
+        'laravel/framework' => '^12.5.0',
+        'pestphp/pest' => '^4.5.0',
+    ]);
+
+    expect($updated)->toBe(2);
+    expect($reader->getRequiredConstraints())->toBe([
+        'laravel/framework' => '^12.5.0',
+        'guzzlehttp/guzzle' => '^7.0',
+        'pestphp/pest' => '^4.5.0',
+    ]);
+
+    unlink($tmpDir . '/composer.json');
+    unlink($tmpDir . '/composer.lock');
+    rmdir($tmpDir);
+});
