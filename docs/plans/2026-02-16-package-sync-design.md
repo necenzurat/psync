@@ -7,7 +7,7 @@ A global Composer CLI tool that reads a project's `composer.json` and `composer.
 ## Installation
 
 ```bash
-composer global require necenzurat/package-sync
+composer global require necenzurat/psync
 ```
 
 ## Framework

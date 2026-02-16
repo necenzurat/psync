@@ -1,5 +1,5 @@
 {
-    "name": "necenzurat/package-sync",
+    "name": "necenzurat/psync",
     "description": "Compare installed Composer packages against latest Packagist versions",
     "type": "project",
     "license": "MIT",
@@ -35,5 +35,5 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "bin": ["package-sync"]
+    "bin": ["psync"]
 }
