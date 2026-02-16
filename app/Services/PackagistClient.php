@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\Client\Pool;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class PackagistClient
@@ -11,7 +12,8 @@ class PackagistClient
 
     public function getLatestVersion(string $packageName): ?string
     {
-        $response = Http::get(self::BASE_URL . '/' . $packageName . '.json');
+        $response = Http::withOptions($this->guzzleOptions())
+            ->get(self::BASE_URL . '/' . $packageName . '.json');
 
         if ($response->failed()) {
             return null;
@@ -28,9 +30,11 @@ class PackagistClient
      */
     public function getLatestVersions(array $packageNames): array
     {
-        $responses = Http::pool(function (Pool $pool) use ($packageNames) {
+        $options = $this->guzzleOptions();
+
+        $responses = Http::pool(function (Pool $pool) use ($packageNames, $options) {
             foreach ($packageNames as $name) {
-                $pool->as($name)->get(self::BASE_URL . '/' . $name . '.json');
+                $pool->as($name)->withOptions($options)->get(self::BASE_URL . '/' . $name . '.json');
             }
         });
 
@@ -39,7 +43,7 @@ class PackagistClient
         foreach ($packageNames as $name) {
             $response = $responses[$name];
 
-            if ($response->failed()) {
+            if (! $response instanceof Response || $response->failed()) {
                 $results[$name] = null;
 
                 continue;
@@ -50,6 +54,26 @@ class PackagistClient
         }
 
         return $results;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function guzzleOptions(): array
+    {
+        $certPaths = [
+            '/etc/ssl/cert.pem',
+            '/etc/ssl/certs/ca-certificates.crt',
+            '/etc/pki/tls/certs/ca-bundle.crt',
+        ];
+
+        foreach ($certPaths as $path) {
+            if (file_exists($path)) {
+                return ['verify' => $path];
+            }
+        }
+
+        return [];
     }
 
     /**
