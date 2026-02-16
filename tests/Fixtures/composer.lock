@@ -1,0 +1,18 @@
+{
+    "packages": [
+        {
+            "name": "laravel/framework",
+            "version": "v12.0.1"
+        },
+        {
+            "name": "guzzlehttp/guzzle",
+            "version": "7.8.1"
+        }
+    ],
+    "packages-dev": [
+        {
+            "name": "pestphp/pest",
+            "version": "v4.3.0"
+        }
+    ]
+}
