@@ -64,11 +64,16 @@ class CheckCommand extends Command
         }
 
         $tableRows = array_map(function (array $row): array {
-            $status = $row['status'] === 'UPDATE'
-                ? '<fg=yellow>' . $row['status'] . '</>'
-                : '<fg=green>' . $row['status'] . '</>';
+            if ($row['status'] === 'UPDATE') {
+                return [
+                    '<fg=red>' . $row['package'] . '</>',
+                    '<fg=red>' . $row['installed'] . '</>',
+                    '<fg=red>' . $row['latest'] . '</>',
+                    '<fg=red>' . $row['status'] . '</>',
+                ];
+            }
 
-            return [$row['package'], $row['installed'], $row['latest'], $status];
+            return [$row['package'], $row['installed'], $row['latest'], '<fg=green>' . $row['status'] . '</>'];
         }, $rows);
 
         $this->table(
